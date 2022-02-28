@@ -8,7 +8,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true # 启用基于服务发现的路由定位
+#          enabled: true # 开启服务注册中心服务发现
           lower-case-service-id: true # 启用服务实例id名称小写支持
       routes:
         - id: product-provider
@@ -28,3 +28,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8300/eureka #Eureka服务获取地址
+
+logging:
+  level:
+    org.springframework.cloud.gateway: debug # 配置Gateway日志等级，输出转发细节日志
