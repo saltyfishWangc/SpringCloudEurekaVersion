@@ -1,0 +1,15 @@
+server:
+  port: 8100
+
+spring:
+  application:
+    name: springcloud-eureka-product-provider-8100
+  datasource:
+    url: jdbc:mysql://172.16.243.155:3306/springcloud?useUnicode=true&characterEncoding=utf-8&&userSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: root
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml # Mybatis 映射文件位置
+  type-aliases-package: com.wangc.springcloud.entity # 表对应的实体类包

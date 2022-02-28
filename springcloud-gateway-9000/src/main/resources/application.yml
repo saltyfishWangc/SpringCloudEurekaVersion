@@ -1,0 +1,16 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: gateway-9000
+  cloud:
+    gateway:
+      routes:
+        - id: product-provider
+          uri: http://localhost:8100
+          predicates:
+            - Path=/product/provider/**
+        - id: product-consumer
+          uri: http://localhost:8200
+          predicates:
+            - Path=/product/consumer/**
