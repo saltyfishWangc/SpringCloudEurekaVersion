@@ -18,7 +18,14 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-eureka-client</artifactId>
+            <!--<artifactId>spring-cloud-netflix-eureka-client</artifactId>-->
+            <!--
+                注意：这里一定引入的是eureka-client的starter，要是引入的上面的，gateway项目可以正常启动，但是不会有eureka-client的功能
+                所以gateway也不会被注入到eureka，启动日志里都不会有DiscoveryClient的日志，因为压根就没有eureka-client功能。
+                引入spring-cloud-starter-netflix-eureka-client后，启动日志就有了DiscoveryClient的日志，最后gateway页注入到eureka了
+                说明一个问题：application.yml里面配置的都是starter指定的配置项
+            -->
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
