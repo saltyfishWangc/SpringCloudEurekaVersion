@@ -27,6 +27,9 @@
             -->
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+        <!-- 引入Hystrix实现熔断降级-->
+        <!-- 如果不引用，gateway应用可以正常启动，在请求进来触发熔断降级的路由时会报 Unable to find GatewayFilterFactory with name Hystrix-->
+        <!-- 因为配置的是Hystrix，对应起作用的是HystrixGatewayFilterFactory，是这个依赖中的类-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
