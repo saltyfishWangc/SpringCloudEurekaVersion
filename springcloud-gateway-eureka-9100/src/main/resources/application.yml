@@ -12,13 +12,34 @@ spring:
           lower-case-service-id: true # 启用服务实例id名称小写支持
       routes:
         - id: product-provider
-          uri: lb://springcloud-eureka-client-product-provider-8400
+          uri: lb://springcloud-eureka-client-product-consumer-8500
           predicates:
             - Path=/product/provider/**
         - id: product-consumer
           uri: lb://springcloud-eureka-client-product-consumer-8500
           predicates:
             - Path=/product/consumer/**
+        # 下面通过Hystrix进行熔断降级
+        - id: rateLimit_route
+          uri: lb://springcloud-eureka-client-product-consumer-8500
+          predicates:
+            - Path=/test/**
+
+          # 下面配置两个过滤器：StripPrefix和Hystrix
+          filters:
+            # 过滤器StripPrefix的作用是截取掉请求路径中最前面的n个部分
+            # StripPrefix=1 表示截取路径的个数为1，比如进来的请求uri是/test/product/provider/get/1,匹配成功后，路由到后端的请求路径就会变成/product/provider/get/1
+            - StripPrefix=1
+            # 过滤器Hystrix作用是通过Hystrix进行熔断降级。
+            # 当上游的请求，进入了Hystrix熔断降级机制时，就会调用fallbackUri配置的降级地址
+            - name: Hystrix
+              args:
+                name: fallbackCmdA
+                # 跳转到 /fallbackA
+                # 当路由对应uri对应的服务 不可用 或者 返回异常 时都会跳转到/fallbackA
+                fallbackUri: forward:/fallbackA
+          # 配置了Hystrix就需要单独设置Hystrix的commandKey的超时时间
+          hystrix.command.fallbackCmdA.execution.isolation.thread.timeoutInMilliseconds: 5000
 
 eureka:
   instance:
