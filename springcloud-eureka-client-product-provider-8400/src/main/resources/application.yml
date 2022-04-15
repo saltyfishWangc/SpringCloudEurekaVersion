@@ -2,13 +2,11 @@ server:
   port: 8400
 
 spring:
+  profiles:
+    # mac对应家里
+    active: wins
   application:
     name: springcloud-eureka-client-product-provider-8400
-  datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://172.16.243.155:3306/springcloud?useUnicode=true&characterEncoding=utf-8&&userSSL=false
-    username: root
-    password: root
 
 mybatis:
   mapper-locations: classpath:mapping/*Mapper.xml # Mybatis 映射文件位置
