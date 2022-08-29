@@ -1,6 +1,9 @@
 package com.wangc.springcloud.resolver;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.cloud.gateway.route.Route;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -10,6 +13,7 @@ import reactor.core.publisher.Mono;
  * 定义限流器的key-resolver
  */
 @Configuration
+@Slf4j
 public class ResolverConfiguration {
 
     /**
@@ -31,9 +35,21 @@ public class ResolverConfiguration {
      */
 
     @Bean
-    @Primary
+//    @Primary
     KeyResolver userKeyResolver() {
-        return exchange -> Mono.just(exchange.getRequest().getQueryParams().getFirst("user"));
+        /**
+         * 这种限流器要求请求传参一定要有user参数，如果没有，是会触发异常的
+         * 如：
+         * curl http://127.0.0.1:9100/test/product/consumer/get/1?user  这样正常访问
+         * curl http://127.0.0.1:9100/test/product/consumer/get/1 是无法请求的会报异常，如果配置了熔断机制，会转发到熔断的请求/fallbackA进行返回
+         */
+//        return exchange -> Mono.just(exchange.getRequest().getQueryParams().getFirst("user"));
+//        return exchange -> Mono.just("1");
+        return exchange -> {
+            String user = exchange.getRequest().getQueryParams().getFirst("user");
+            log.info("userKeyResolver 限流规则 user：{}", user);
+            return Mono.just(user);
+        };
     }
 
     /**
@@ -42,7 +58,12 @@ public class ResolverConfiguration {
      */
     @Bean
     KeyResolver ipKeyResolver() {
-        return exchange -> Mono.just(exchange.getRequest().getRemoteAddress().getHostName());
+//        return exchange -> Mono.just(exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
+        return exchange -> {
+            String hostAddress = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+            log.info("ipKeyResolver 限流规则 ip：{}", hostAddress);
+            return Mono.just(hostAddress);
+        };
     }
 
     /**
@@ -50,7 +71,26 @@ public class ResolverConfiguration {
      * @return
      */
     @Bean
+    @Primary
     KeyResolver uriKeyResolver() {
-        return exchange -> Mono.just(exchange.getRequest().getPath().value());
+//        return exchange -> Mono.just(exchange.getRequest().getPath().value());
+        return exchange -> {
+            String uri = exchange.getRequest().getPath().value();
+            log.info("uriKeyResolver 限流规则 uri：{}", uri);
+            return Mono.just(uri);
+        };
+    }
+
+    /**
+     * 按照 path 限流
+     * @return
+     */
+    @Bean(value = "pathKeyResolver")
+    public KeyResolver pathKeyResolver() {
+        return exchange -> {
+            Route route = (Route) exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
+            log.info("pathKeyResolver 限流规则 routeId：{}", route.getId());
+            return Mono.just(exchange.getRequest().getPath().toString());
+        };
     }
 }

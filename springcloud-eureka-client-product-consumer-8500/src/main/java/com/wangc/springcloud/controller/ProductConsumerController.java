@@ -17,7 +17,7 @@ public class ProductConsumerController {
 
     public static String url = "http://localhost:8400/";
 
-    @GetMapping("product/consumer/get/{id}")
+    @GetMapping("/zcff/product/consumer/get/{id}")
     public Result selectById(@PathVariable("id") Long id) {
         log.info(id + "是我干的");
         return new Result(200, "查询成功", restTemplate.getForObject(url + "product/provider/get/" + id, Result.class));

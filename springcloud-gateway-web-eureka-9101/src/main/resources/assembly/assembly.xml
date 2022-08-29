@@ -1,0 +1,50 @@
+<assembly>
+    <id>assembly</id>
+    <formats>
+        <format>dir</format>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <!-- 打包启停脚本到根目录下 -->
+        <fileSet>
+            <directory>src/main/resources/assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <!--<includes>-->
+            <!--<include>*.sh</include>-->
+            <!--<include>*.bat</include>-->
+            <!--</includes>-->
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <fileSet>
+            <directory>${profile.dir}</directory>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/xml</directory>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+
+        <!-- 打包本工程jar文件到根目录下 -->
+        <!--<fileSet>-->
+        <!--<directory>target</directory>-->
+        <!--<includes>-->
+        <!--<include>*.jar</include>-->
+        <!--</includes>-->
+        <!--<outputDirectory>${file.separator}</outputDirectory>-->
+        <!--</fileSet>-->
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+</assembly>

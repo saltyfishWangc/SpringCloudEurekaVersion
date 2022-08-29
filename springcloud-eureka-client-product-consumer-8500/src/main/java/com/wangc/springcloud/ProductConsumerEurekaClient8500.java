@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
-@EnableDiscoveryClient
+//@EnableDiscoveryClient
 public class ProductConsumerEurekaClient8500 {
 
     public static void main(String... args) {

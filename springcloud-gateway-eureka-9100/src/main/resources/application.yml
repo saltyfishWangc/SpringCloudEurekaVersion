@@ -12,20 +12,25 @@ spring:
           lower-case-service-id: true # 启用服务实例id名称小写支持
       routes:
         - id: product-provider
-          uri: lb://springcloud-eureka-client-product-consumer-8400
+          uri: lb://springcloud-eureka-client-product-provider-8400
+          # predicates 的作用是做请求的匹配
           predicates:
             - Path=/product/provider/**
+
         - id: product-consumer
           uri: lb://springcloud-eureka-client-product-consumer-8500
           predicates:
             - Path=/product/consumer/**
+
         # 下面通过Hystrix进行熔断降级
+        # 这个路由主要是用来测试熔断(Hystrix)和限流(RequestRateLimit)的，现在测试的情况是只要配置了RequestRateLimit，请求进来限流没生效，且会报异常java.lang.IllegalStateException: block()/blockFirst()/blockLast() are blocking，后面再查看这个问题
         - id: rateLimit_route
           uri: lb://springcloud-eureka-client-product-consumer-8500
           predicates:
             - Path=/test/**
 
           # 熔断器和限流等都是通过过滤器实现
+          # filters 的作用是在请求转发之前或之后对请求或者响应做处理，改变
           filters:
             # 下面配置两个过滤器：StripPrefix和Hystrix
             # 过滤器StripPrefix的作用是截取掉请求路径中最前面的n个部分
@@ -44,7 +49,7 @@ spring:
             - name: RequestRateLimiter
               args:
                 # key-resolver：用于限流的键的解析器的Bean对象的名字。它使用SpEL表达式根据#{@beanName}从Spring容器中获取Bean对象
-                key-resolver: '#{@userKeyResolver}'
+                key-resolver: '#{@uriKeyResolver}'
                 # replenishRate：令牌桶每秒填充平均速率
                 redis-rate-limiter.replenishRate: 1
                 # burstCapacity：令牌桶总容量
