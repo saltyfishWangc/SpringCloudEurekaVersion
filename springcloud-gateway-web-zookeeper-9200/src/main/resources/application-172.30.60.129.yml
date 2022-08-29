@@ -12,6 +12,9 @@ spring:
         max-active: 200
     # 单位是毫秒
     timeout: 3000
+
+  # 像zookeeper注册服务，服务实例为${spring.application.name}
+  # 启动后，在zookeeper中ls /services可以看到对应名称的服务实例
   cloud:
     zookeeper:
       connect-string: 172.30.60.129:2181
