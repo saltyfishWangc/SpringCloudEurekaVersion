@@ -1,0 +1,7 @@
+server:
+  port: 8600
+spring:
+  application:
+    name: springcloud-eureka-openfeign-provider-8600
+  profiles:
+    active: eureka
