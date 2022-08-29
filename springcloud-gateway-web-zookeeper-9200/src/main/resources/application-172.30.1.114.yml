@@ -1,0 +1,46 @@
+# redis配置
+spring:
+  application:
+    name: springcloud-gateway-web-zookeeper:${server.port}
+
+  redis:
+    port: 6379
+    host: 172.30.1.113
+    password: p2predistest
+    jedis:
+      pool:
+        max-active: 200
+    # 单位是毫秒
+    timeout: 3000
+  cloud:
+    zookeeper:
+      connect-string: 172.30.1.113:2181
+
+    gateway:
+      routes:
+        # 默认的路由
+        - id: product-provider1
+          uri: lb://xd-service
+          order: 1
+          predicates:
+            - Path=/outChannel/**
+
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+# 将actuator端点暴露出来
+# http://localhost:2000/actuator/gateway/routes可以查看配置的路由信息
+# http://localhost:${server.port}/actuator/gateway/routes
+# 这个一定要引入actutor的依赖包，不然请求这个地址一直404，崩溃
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+#        include: gateway
+        include: "*"
+
+

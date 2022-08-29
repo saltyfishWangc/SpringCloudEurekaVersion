@@ -1,0 +1,60 @@
+
+eureka:
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8300/eureka/
+
+# redis配置
+spring:
+  application:
+    name: springcloud-gateway-web-eureka:${server.port}
+  redis:
+    port: 6379
+    host: 192.168.19.128
+    password: admin123456
+    jedis:
+      pool:
+        max-active: 200
+    # 单位是毫秒
+    timeout: 3000
+  cloud:
+    gateway:
+      routes:
+
+        - id: product-provider1
+        #          uri: lb://springcloud-eureka-client-product-provider-8400
+          uri: lb://springcloud-eureka-client-product-provider-8400
+          predicates:
+            # 请求参数中包含inChannel参数的请求
+#            - Query=inChannel
+            # 请求参数中包含inChannel参数且值为279wxmsydcd的请求
+            - Query=inChannel, 279wxmsydcd
+            
+        - id: product-provider2
+        #          uri: lb://springcloud-eureka-client-product-provider-8400
+          uri: lb://springcloud-eureka-client-product-consumer-8500
+          predicates:
+            # 请求参数中包含inChannel参数的请求
+#            - Query=inChannel
+            # 请求参数中包含inChannel参数且值为279wxmsydcd的请求
+            - Query=inChannel, 1
+
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+# 将actuator端点暴露出来
+# http://localhost:2000/actuator/gateway/routes可以查看配置的路由信息
+# 这个一定要引入actutor的依赖包，不然请求这个地址一直404，崩溃
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+#        include: gateway
+        include: "*"
+
+
