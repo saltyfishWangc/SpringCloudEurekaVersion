@@ -1,0 +1,16 @@
+server:
+  port: 8700
+spring:
+  application:
+    name: springcloud-eureka-openfeign-consumer-8700
+  profiles:
+    active: eureka,openfeign
+#eureka:
+#  instance:
+#    instance-id: ${spring.application.name}
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8300/eureka/
+
