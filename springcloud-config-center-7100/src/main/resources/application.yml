@@ -1,0 +1,24 @@
+server:
+  port: 7100
+spring:
+  application:
+    name: springcloud-config-center-7100
+  cloud:
+    config:
+      server:
+        git:
+          skip-ssl-validation: true # 调过ssl认证
+          uri: https://github.com/saltyfishWangc/SpringCloudConfig.git
+          search-paths: # 搜索目录
+            - SpringCloudConfig
+          default-label: main # 读取分支
+          # 启动应用后，可以请求http://localhost:7100/main/config-dev.yml 获取到github上文件内容，这个请求路径是由config创建的，所以这也是为什么要引入spring-boot-starter-web依赖的原因
+          force-pull: true # 配置强制pull,否则当git判断本地和数据库数据不一致时，不进行更新，当请求git数据时，会有Could not fetch remote for main remote告警日志
+eureka:
+  instance:
+    instance-id: ${spring.application.name}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8300/eureka/ #Eureka地址

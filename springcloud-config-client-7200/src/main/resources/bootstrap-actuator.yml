@@ -1,0 +1,9 @@
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+# 在注入配置信息的类上加上@RefreshScope，然后在浏览器请求spring cloud config client的/actuator/refresh或者通过终端命令curl -X POST "http://127.0.0.1:7200/actuator/refresh" 返回会收到["config.client.version", "config.info"]，这个信息主要返回的是更新了的字段，如果配置信息没有更新，则返回的是空串。然后在请求config client获取配置信息就是最新的了
+# 注意：实践得出client的刷新是取决于config server的更新，如果在github上修改了配置信息后，一定时间内config server是没有同步到更新的(可能是网络延时或者config server定时请求github配置信息的原因)，这个时候就算curl -X POST "http://127.0.0.1:7200/actuator/refresh 刷新config client也是拿不到更新的配置信息的

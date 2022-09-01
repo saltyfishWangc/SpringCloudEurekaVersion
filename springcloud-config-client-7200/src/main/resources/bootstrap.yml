@@ -1,0 +1,27 @@
+server:
+  port: 7200
+
+spring:
+  profiles:
+    active: actuator
+  application:
+    name: springcloud-config-client-7200
+  cloud:
+    # config客户端配置
+    config:
+      label: main # 分支名称
+      name: config # 配置文件名称
+      profile: dev # 读取后缀名称
+      uri: http://localhost:7100 # config配置中心地址 注：这种直接指定ip+端口的没有通过eureka服务的，还可以指定eureka服务名称，通过eureka服务
+#      uri: lb://springcloud-config-center-7100 config不支持
+      # 实践结论：
+      # 1.当config配置中心服务没启动时，如果启动config client会报错，因为通过@Value引用了git上的信息无法获取，那对应的bean就无法注入
+      # 2.没有引入actuator的版本：当config client应用启动后，如果关闭config配置中心服务，是不会影响config client的，关于git上的信息还是原来注入进来的
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8300/eureka/ #Eureka地址
+
