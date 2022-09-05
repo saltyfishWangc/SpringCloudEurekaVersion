@@ -1,39 +1,69 @@
 #!/bin/bash
+# 跳到指定目录的上级目录
+cd `dirname $0`
+BIN_DIR=`pwd`
+cd ..
+DEPLOY_DIR=`pwd`
+CONF_DIR=$DEPLOY_DIR/conf
+SERVER_NAME=xd-service-gateway
+LOGS_FILE=$DEPLOY_DIR/logs
 
-APP_NAME="spring-cloud-gateway"
-APP="spring-cloud-gateway.jar"
-LOG_DIR="/app/xindai/logs/spring-cloud-gateway"
-`mkdir -p $LOG_DIR`
-
-IP=`ifconfig eth0 | grep "inet addr" | awk '{print $2}' | awk -F ":" '{print $2}'`
-JVM_ARG="${JAVA_OPTS} -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m -Xms2048m -Xmx2048m -Xmn768m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=10 -XX:+PrintGCDetails "
-
-echo "应用名称:${APP_NAME}"
-echo "应用:${APP}"
-echo "服务器ip:${IP}"
-echo "日志路径:${LOG_DIR}"
-echo "JVM参数:${JVM_ARG}"
-
-PIDS=`ps -ef | grep java | grep "$APP" | awk '{print $2}'`
-PID="${PIDS}"
-
-echo "${APP_NAME}PID=${PID}"
-
-if [ -z ${PID} ]; then
-    echo "${APP_NAME}没有运行"
-else
-    echo "${APP_NAME}运行中PID=${PIDS} 执行kill命令"
-    kill -9 ${PID}
+if [ -z "$SERVER_NAME" ]; then
+    SERVER_NAME="hostname"
 fi
 
-sleep 1s
-nohup java -jar ${JVM_ARG} ${APP} >> $LOG_DIR/application.$APPL_NAME.log 2>&1 &
-
-sleep 2s
-NPIDS=`ps -ef | grep java | grep "${APP}" | awk '{print $2}'`
-if [ ! -n "${NPIDS}" ]
-then
-    echo "${APP}启动失败!!!"
-else
-    echo "${APP}启动成功PID=${NPIDS}"
+PIDS=`ps -ef | grep java | grep "${SERVER_NAME}" | awk '{print $2}'`
+if [ -n "${PIDS}" ]; then
+    echo "ERROR: The ${SERVER_NAME} already started!"
+    echo "PIDS: ${PIDS}"
+    exit 1
 fi
+
+LOGS_DIR=""
+if [ -z "${LOGS_FILE}" ]; then
+    LOGS_DIR=`dirname ${LOGS_FILE}`
+else
+    LOGS_DIR=${DEPLOY_DIR}/logs
+fi
+
+echo "LOGS_DIR=${LOGS_DIR}"
+
+if [ ! -d ${LOGS_DIR} ]; then
+    mkdir ${LOGS_DIR}
+    echo "CREATE ${LOGS_DIR} SUCCESS"
+fi
+STDOUT_FILE="${LOGS_DIR}/${SERVER_NAME}.log"
+
+if [ ! -e ${STDOUT_FILE} ]; then
+    touch ${STDOUT_FILE}
+    chmod 777 ${STDOUT_FILE}
+fi
+
+LIB_DIR=${DEPLOY_DIR}/lib
+LIB_JARS=`ls ${LIB_DIR} | grep .jar | awk '{print "'${LIB_DIR}'/"$0}' | tr "\n" ":"`
+
+JAVA_OPTS=" ${JAVA_OPTS} -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true "
+JAVA_DEBUG_OPTS=""
+#if [ "$1"=="debug" ]; then
+#    JAVA_DEBUG_OPTS=" -Xdebug -xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n "
+#fi
+JAVA_JMS_OPTS=""
+#if [ "$1" = "jms" ]; then
+#    JAVA_JMS_OPTS=" -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false "
+#fi
+JAVA_MEM_OPTS=""
+BITS=`java -version 2>&1 | grep -i 64-bit`
+#if [ -n "$BITS" ]; then
+#    JAVA_MEM_OPTS=" -server -Xmx2g -Xms2g -Xmn256m -XX:PermSize=128m -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupanyOnly -XX:CMSInitiatingOccupancyFraction=70 "
+#else
+#    JAVA_MEM_OPTS=" -server -Xms1g -Xmx1g -XX:PermSize=128m -XX:SurvivorRatio=2 -XX:+UseParallelGC "
+#fi
+
+echo -e "Starting the ${SERVER_NAME} ...\c"
+t1=`date '+%Y-%m-%d'`
+echo "STDOUT: $STDOUT_FILE.${t1}"
+nohup java $JAVA_OPTS $JAVA_MEM_OPTS $JAVA_DEBUG_OPTS $JAVA_JMS_OPTS -classpath $CONF_DIR:$LIB_JARS com.wangc.springcloud.gateway.SpringCloudGatewayWebEureka9101 2>&1 >> $STDOUT_FILE &
+
+echo "OK!"
+PIDS=`ps -ef | grep java | grep "$DEPLOY_DIR" | awk '{print $2}'`
+echo "PID: $PIDS"
